@@ -1,6 +1,6 @@
 self.__uv$config = {
     prefix: '/uv/service/',
-    bare: 'https://bare.benroxy.me/', // A fast public bare for YouTube
+    bare: 'https://bare.benroxy.me/', // This fast server handles the "heavy" YouTube data
     encodeUrl: Ultraviolet.codec.xor.encode,
     decodeUrl: Ultraviolet.codec.xor.decode,
     handler: '/uv/uv.handler.js',
