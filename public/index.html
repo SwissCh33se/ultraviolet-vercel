@@ -11,6 +11,18 @@
     <script src="/uv/uv.config.js"></script>
 
     <script>
+        window.__uv$config = {
+            prefix: '/uv/service/',
+            bare: 'https://bare.benroxy.me/', 
+            encodeUrl: Ultraviolet.codec.xor.encode,
+            decodeUrl: Ultraviolet.codec.xor.decode,
+            handler: '/uv/uv.handler.js',
+            client: '/uv/uv.client.js',
+            bundle: '/uv/uv.bundle.js',
+            config: '/uv/uv.config.js',
+            sw: '/uv/uv.sw.js',
+        };
+
         if ("serviceWorker" in navigator) {
             window.addEventListener("load", () => {
                 navigator.serviceWorker.register("/uv/sw.js", {
@@ -21,24 +33,15 @@
     </script>
 
     <style>
-        /* Base Reset & Fonts */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
-
+        /* Modern Glassmorphism UI */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        
         body {
             background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e293b);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
-            height: 100vh;
-            overflow: hidden;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            height: 100vh; overflow: hidden; color: white;
+            display: flex; justify-content: center; align-items: center;
         }
 
         @keyframes gradientBG {
@@ -47,293 +50,174 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* UI Container (The Home Screen) */
         #ui-container {
-            position: absolute;
-            transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
-            z-index: 10;
-            width: 100%;
-            display: flex;
-            justify-content: center;
+            position: absolute; width: 100%; display: flex; justify-content: center;
+            transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s; z-index: 10;
         }
 
-        #ui-container:not(.active) {
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-20px);
+        #ui-container.hidden {
+            opacity: 0; visibility: hidden; transform: translateY(-20px); pointer-events: none;
         }
 
-        /* Glassmorphism Panel */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 3rem 4rem;
-            text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            width: 90%;
-            max-width: 700px;
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px;
+            padding: 3rem 4rem; text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); width: 90%; max-width: 700px;
         }
 
-        .glass-panel h1 {
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
-            font-weight: 700;
+        h1 {
+            font-size: 3.5rem; margin-bottom: 0.5rem; font-weight: 700; letter-spacing: -1px;
             background: linear-gradient(to right, #a78bfa, #38bdf8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
-        .glass-panel p {
-            color: #94a3b8;
-            margin-bottom: 2rem;
-            font-size: 1.1rem;
-        }
+        p { color: #94a3b8; margin-bottom: 2rem; font-size: 1.1rem; }
 
-        /* Search Wrapper & Inputs */
         .search-wrapper {
-            display: flex;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50px;
-            padding: 5px;
+            display: flex; background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50px; padding: 5px;
             transition: all 0.3s ease;
         }
 
-        .search-wrapper:focus-within {
-            border-color: #38bdf8;
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        .search-wrapper:focus-within { border-color: #38bdf8; box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }
+
+        select {
+            background: transparent; color: #e2e8f0; border: none; padding: 1rem 1.5rem;
+            font-size: 1rem; outline: none; cursor: pointer;
+            border-right: 1px solid rgba(255, 255, 255, 0.1); appearance: none;
+        }
+        
+        select option { background: #1e293b; color: white; }
+
+        input {
+            flex: 1; background: transparent; border: none; color: white;
+            padding: 1rem 1.5rem; font-size: 1rem; outline: none; width: 100%;
         }
 
-        .select-wrapper select {
-            background: transparent;
-            color: #e2e8f0;
-            border: none;
-            padding: 1rem 1.5rem;
-            font-size: 1rem;
-            outline: none;
-            cursor: pointer;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            appearance: none;
-        }
-
-        .select-wrapper select option {
-            background: #1e293b;
-            color: white;
-        }
-
-        #urlInput {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: white;
-            padding: 1rem 1.5rem;
-            font-size: 1rem;
-            outline: none;
-            width: 100%;
-        }
-
-        #urlInput::placeholder {
-            color: #64748b;
-        }
+        input::placeholder { color: #64748b; }
 
         #searchButton {
             background: linear-gradient(to right, #6366f1, #3b82f6);
-            border: none;
-            border-radius: 50px;
-            color: white;
-            padding: 0 1.5rem;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border: none; border-radius: 50px; color: white; padding: 0 1.5rem;
+            cursor: pointer; font-size: 1.2rem; transition: transform 0.2s, box-shadow 0.2s;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        #searchButton:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
-        }
+        #searchButton:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
 
-        /* Iframe Container & Controls */
+        /* Browser View */
         #iframe-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.4s ease, visibility 0.4s;
-            background: #000;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; opacity: 0; visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s; background: #000;
         }
 
-        #iframe-container.active {
-            opacity: 1;
-            visibility: visible;
-        }
+        #iframe-container.active { opacity: 1; visibility: visible; }
 
         .iframe-controls {
-            display: flex;
-            background: #0f172a;
-            padding: 10px 20px;
-            gap: 10px;
-            border-bottom: 1px solid #1e293b;
-            align-items: center;
+            display: flex; background: #0f172a; padding: 10px 20px; gap: 10px;
+            border-bottom: 1px solid #1e293b; align-items: center;
         }
 
         .iframe-controls button {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #cbd5e1;
-            padding: 8px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #cbd5e1; padding: 8px 15px; border-radius: 8px; cursor: pointer;
+            font-size: 1rem; display: flex; align-items: center; gap: 5px; transition: all 0.2s;
         }
 
-        .iframe-controls button:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-        }
+        .iframe-controls button:hover { background: rgba(255, 255, 255, 0.1); color: white; }
 
-        .iframeWindow {
-            flex: 1;
-            border: none;
-            width: 100%;
-            height: 100%;
-            background: white; 
-        }
+        .iframeWindow { flex: 1; border: none; width: 100%; height: 100%; background: white; }
     </style>
 </head>
 <body>
-    <div id="ui-container" class="active">
+
+    <div id="ui-container">
         <div class="glass-panel">
-            <h1>Stellar Web</h1>
-            <p>Surf the web freely and securely.</p>
+            <h1>Stellar Proxy</h1>
+            <p>Select your engine and surf the web securely.</p>
 
             <div class="search-wrapper">
-                <div class="select-wrapper">
-                    <select id="engineSelect" title="Choose Search Engine">
-                        <option value="https://www.google.com/search?q=%s">Google</option>
-                        <option value="https://search.brave.com/search?q=%s">Brave</option>
-                        <option value="https://www.bing.com/search?q=%s">Bing (Edge)</option>
-                        <option value="https://duckduckgo.com/?q=%s">DuckDuckGo</option>
-                    </select>
-                </div>
-                <input type="text" id="urlInput" placeholder="Search the web or enter a URL..." autocomplete="off">
-                <button id="searchButton" title="Search"><i class="ph ph-magnifying-glass"></i></button>
+                <select id="engineSelect" title="Search Engine">
+                    <option value="https://www.google.com/search?q=%s">Google</option>
+                    <option value="https://search.brave.com/search?q=%s">Brave</option>
+                    <option value="https://www.bing.com/search?q=%s">Edge</option>
+                    <option value="https://duckduckgo.com/?q=%s">DuckDuckGo</option>
+                </select>
+                <input type="text" id="urlInput" placeholder="Enter URL or search..." autocomplete="off">
+                <button id="searchButton" title="Search"><i class="ph ph-arrow-right"></i></button>
             </div>
         </div>
     </div>
 
     <div id="iframe-container">
         <div class="iframe-controls">
-            <button id="homeButton" title="Back to Home"><i class="ph ph-house"></i> Home</button>
-            <button id="reloadButton" title="Reload Page"><i class="ph ph-arrows-clockwise"></i></button>
-            <button id="fullscreenButton" title="Toggle Fullscreen"><i class="ph ph-corners-out"></i></button>
+            <button onclick="goHome()" title="Home"><i class="ph ph-house"></i> Home</button>
+            <button onclick="reloadFrame()" title="Reload"><i class="ph ph-arrows-clockwise"></i></button>
+            <button onclick="toggleFullscreen()" title="Fullscreen"><i class="ph ph-corners-out"></i></button>
         </div>
         <iframe id="iframeWindow" class="iframeWindow"></iframe>
     </div>
 
     <script>
-        // UI Elements
         const uiContainer = document.getElementById('ui-container');
         const iframeContainer = document.getElementById('iframe-container');
         const iframeWindow = document.getElementById('iframeWindow');
         const urlInput = document.getElementById('urlInput');
-        const searchButton = document.getElementById('searchButton');
         const engineSelect = document.getElementById('engineSelect');
 
-        // Control Bar Elements
-        const homeButton = document.getElementById('homeButton');
-        const reloadButton = document.getElementById('reloadButton');
-        const fullscreenButton = document.getElementById('fullscreenButton');
-
-        // Robust Search & URL Formatting Logic
-        function formatSearch(input, engineTemplate) {
-            try {
-                // If it's a fully formed URL, return it
-                return new URL(input).toString();
-            } catch (err) {}
-
-            try {
-                // If they typed something like "discord.com", add https:// and check if it's valid
-                const url = new URL(`https://${input}`);
-                if (url.hostname.includes(".")) {
-                    return url.toString();
-                }
-            } catch (err) {}
-
-            // If it's not a URL, inject the search term into the selected search engine
-            return engineTemplate.replace("%s", encodeURIComponent(input));
-        }
-
-        // Core execution function
         function performSearch() {
-            const query = urlInput.value.trim();
-            if (!query) return;
+            let val = urlInput.value.trim();
+            if (!val) return;
 
+            // Smart detection: Search query vs Website URL
+            if (!val.includes('.') || val.includes(' ')) {
+                // It's a search term
+                val = engineSelect.value.replace('%s', encodeURIComponent(val));
+            } else {
+                // It's a website URL
+                if (!val.startsWith('http://') && !val.startsWith('https://')) {
+                    val = 'https://' + val;
+                }
+            }
+
+            // Encode and load via Ultraviolet
             try {
-                // 1. Format the URL based on input and dropdown selection
-                const finalUrl = formatSearch(query, engineSelect.value);
-
-                // 2. Encode the URL using Ultraviolet's built-in encoder
-                const encodedUrl = __uv$config.prefix + __uv$config.encodeUrl(finalUrl);
-
-                // 3. Set iframe source
-                iframeWindow.src = encodedUrl;
-
-                // 4. Swap to the browser UI
-                uiContainer.classList.remove('active');
+                iframeWindow.src = __uv$config.prefix + __uv$config.encodeUrl(val);
+                uiContainer.classList.add('hidden');
                 iframeContainer.classList.add('active');
-            } catch (error) {
-                console.error("Search failed. Ensure uv.config.js is loaded and the Service Worker is active.", error);
-                alert("Search failed. Check console for details.");
+            } catch (err) {
+                console.error("Ultraviolet failed to encode. Is the SW registered?", err);
+                alert("Proxy failed to load. Check the console for errors.");
             }
         }
 
         // Event Listeners
-        searchButton.addEventListener('click', performSearch);
-
+        document.getElementById('searchButton').addEventListener('click', performSearch);
         urlInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                performSearch();
-            }
+            if (e.key === 'Enter') performSearch();
         });
 
         // Iframe Controls
-        homeButton.addEventListener('click', () => {
+        function goHome() {
             iframeWindow.src = '';
             urlInput.value = '';
             iframeContainer.classList.remove('active');
-            uiContainer.classList.add('active');
-        });
+            uiContainer.classList.remove('hidden');
+        }
 
-        reloadButton.addEventListener('click', () => {
-            if (iframeWindow.contentWindow) {
-                iframeWindow.contentWindow.location.reload();
-            }
-        });
+        function reloadFrame() {
+            if (iframeWindow.contentWindow) iframeWindow.contentWindow.location.reload();
+        }
 
-        fullscreenButton.addEventListener('click', () => {
+        function toggleFullscreen() {
             if (!document.fullscreenElement) {
-                iframeContainer.requestFullscreen().catch(err => {
-                    console.error(`Error attempting to enable fullscreen: ${err.message}`);
-                });
+                iframeContainer.requestFullscreen();
             } else {
                 document.exitFullscreen();
             }
-        });
+        }
     </script>
 </body>
 </html>
