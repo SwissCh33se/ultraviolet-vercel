@@ -1,17 +1,14 @@
 self.__uv$config = {
     prefix: '/uv/service/',
     
-    /* Wisp is the modern replacement for Bare. 
-      It handles YouTube data much better and works natively on Vercel.
-    */
-    transport: '/lib/wisp.js', 
-    wisp: 'wss://wisp.mercurywork.shop/', 
-
-    // Legacy Bare property (kept for backward compatibility, but Wisp will take over)
+    // The backend server that actually fetches the sites
     bare: 'https://bare.benroxy.me/', 
     
+    // Encoding settings (XOR is standard for Ultraviolet)
     encodeUrl: Ultraviolet.codec.xor.encode,
     decodeUrl: Ultraviolet.codec.xor.decode,
+    
+    // Paths to your core Ultraviolet files
     handler: '/uv/uv.handler.js',
     client: '/uv/uv.client.js',
     bundle: '/uv/uv.bundle.js',
