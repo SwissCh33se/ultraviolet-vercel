@@ -82,14 +82,6 @@
 
         .search-wrapper:focus-within { border-color: #38bdf8; box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }
 
-        select {
-            background: transparent; color: #e2e8f0; border: none; padding: 1rem 1.5rem;
-            font-size: 1rem; outline: none; cursor: pointer;
-            border-right: 1px solid rgba(255, 255, 255, 0.1); appearance: none;
-        }
-        
-        select option { background: #1e293b; color: white; }
-
         input {
             flex: 1; background: transparent; border: none; color: white;
             padding: 1rem 1.5rem; font-size: 1rem; outline: none; width: 100%;
@@ -136,15 +128,9 @@
     <div id="ui-container">
         <div class="glass-panel">
             <h1>Stellar Proxy</h1>
-            <p>Select your engine and surf the web securely.</p>
+            <p>Surf the web freely and securely.</p>
 
             <div class="search-wrapper">
-                <select id="engineSelect" title="Search Engine">
-                    <option value="https://www.google.com/search?q=%s">Google</option>
-                    <option value="https://search.brave.com/search?q=%s">Brave</option>
-                    <option value="https://www.bing.com/search?q=%s">Edge</option>
-                    <option value="https://duckduckgo.com/?q=%s">DuckDuckGo</option>
-                </select>
                 <input type="text" id="urlInput" placeholder="Enter URL or search..." autocomplete="off">
                 <button id="searchButton" title="Search"><i class="ph ph-arrow-right"></i></button>
             </div>
@@ -165,7 +151,6 @@
         const iframeContainer = document.getElementById('iframe-container');
         const iframeWindow = document.getElementById('iframeWindow');
         const urlInput = document.getElementById('urlInput');
-        const engineSelect = document.getElementById('engineSelect');
 
         function performSearch() {
             let val = urlInput.value.trim();
@@ -173,8 +158,8 @@
 
             // Smart detection: Search query vs Website URL
             if (!val.includes('.') || val.includes(' ')) {
-                // It's a search term
-                val = engineSelect.value.replace('%s', encodeURIComponent(val));
+                // It's a search term, default to Google
+                val = 'https://www.google.com/search?q=' + encodeURIComponent(val);
             } else {
                 // It's a website URL
                 if (!val.startsWith('http://') && !val.startsWith('https://')) {
