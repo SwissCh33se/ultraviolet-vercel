@@ -1,42 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Virginia Digital Archive | Peer Review</title>
-    <script src="/uv/uv.bundle.js"></script>
-    <script src="/uv/uv.config.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background: #0f172a; font-family: 'Inter', sans-serif; color: white; overflow: hidden; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        #suggestions { position: absolute; width: 100%; top: 110%; background: #1e293b; border-radius: 12px; z-index: 1000; display: none; border: 1px solid #334155; }
-        .s-item { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #334155; }
-        .s-item:hover { background: #334155; }
-        iframe { position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none; display: none; z-index: 9999; background: black; }
-    </style>
-</head>
-<body>
+import express from 'express';
+import http from 'node:http';
+import { createBareServer } from '@tomphttp/bare-server-node';
+import cors from 'cors';
+import path from "path";
+import { hostname } from "node:os"
 
-    <div id="ui" class="flex flex-col items-center justify-center min-h-screen p-4">
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold tracking-widest text-white">VDA PORTAL</h1>
-            <p class="text-slate-500 text-xs">Research Database Access v5.0</p>
-        </div>
+const server = http.createServer();
+const app = express(server);
+const __dirname = process.cwd();
+const bareServer = createBareServer('/b/');
 
-        <div class="glass w-full max-w-2xl p-6 rounded-3xl relative">
-            <div class="flex gap-2">
-                <div class="relative flex-grow">
-                    <input type="text" id="urlInput" placeholder="Search the archive or enter URL..." 
-                           class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg">
-                    <div id="suggestions"></div>
-                </div>
-                <button id="searchButton" class="bg-blue-600 px-8 rounded-xl font-bold hover:bg-blue-500 transition-all">Go</button>
-            </div>
-        </div>
-    </div>
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname + '/public'));
+app.use(cors());
 
-    <iframe id="iframeWindow"></iframe>
+server.on('request', (req, res) => {
+    if (bareServer.shouldRoute(req)) {
+        bareServer.routeRequest(req, res)
+    } else {
+        app(req, res)
+    }
+})
 
-    <script src="example.js"></script>
-</body>
-</html>
+server.on('upgrade', (req, socket, head) => {
+    if (bareServer.shouldRoute(req)) {
+        bareServer.routeUpgrade(req, socket, head)
+    } else {
+        socket.end()
+    }
+})
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(process.cwd(), '/public/index.html'));
+});
+
+app.get('/index', (req, res) => {
+    res.sendFile(path.join(process.cwd(), '/public/index.html'));
+});
+
+/* add your own extra urls like this:
+
+app.get('/pathOnYourSite', (req, res) => {
+    res.sendFile(path.join(process.cwd(), '/linkToItInYourSource'));
+});
+
+*/
+
+const PORT = 3000;
+server.on('listening', () => {
+    const address = server.address();
+
+    console.log("Listening on:");
+    console.log(`\thttp://localhost:${address.port}`);
+    console.log(`\thttp://${hostname()}:${address.port}`);
+    console.log(
+        `\thttp://${address.family === "IPv6" ? `[${address.address}]` : address.address
+        }:${address.port}`
+    );
+})
+
+server.listen({ port: PORT, })
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
+
+function shutdown() {
+    console.log("SIGTERM signal received: closing HTTP server");
+    server.close();
+    bareServer.close();
+    process.exit(0);
+}
