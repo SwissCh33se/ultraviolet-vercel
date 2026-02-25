@@ -6,11 +6,11 @@
     <title>Stellar Proxy</title>
     
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
     <script src="/uv/uv.bundle.js"></script>
     <script src="/uv/uv.config.js"></script>
 
     <script>
+        // High-speed config injected directly for priority
         window.__uv$config = {
             prefix: '/uv/service/',
             bare: 'https://bare.benroxy.me/', 
@@ -33,176 +33,119 @@
     </script>
 
     <style>
-        /* Modern Glassmorphism UI */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-        
         body {
-            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e293b);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
+            background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
             height: 100vh; overflow: hidden; color: white;
             display: flex; justify-content: center; align-items: center;
         }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
         #ui-container {
-            position: absolute; width: 100%; display: flex; justify-content: center;
-            transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s; z-index: 10;
+            width: 100%; display: flex; justify-content: center;
+            transition: all 0.4s ease;
         }
 
-        #ui-container.hidden {
-            opacity: 0; visibility: hidden; transform: translateY(-20px); pointer-events: none;
-        }
+        #ui-container.hidden { opacity: 0; visibility: hidden; transform: scale(0.95); pointer-events: none; }
 
         .glass-panel {
-            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px;
-            padding: 3rem 4rem; text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); width: 90%; max-width: 700px;
+            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 32px;
+            padding: 4rem; text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); width: 90%; max-width: 600px;
         }
 
-        h1 {
-            font-size: 3.5rem; margin-bottom: 0.5rem; font-weight: 700; letter-spacing: -1px;
-            background: linear-gradient(to right, #a78bfa, #38bdf8);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        h1 { font-size: 3.5rem; margin-bottom: 0.5rem; background: linear-gradient(to right, #a78bfa, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p { color: #94a3b8; margin-bottom: 2rem; }
+
+        .search-bar {
+            display: flex; background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 100px; padding: 8px;
+            transition: 0.3s;
         }
 
-        p { color: #94a3b8; margin-bottom: 2rem; font-size: 1.1rem; }
+        .search-bar:focus-within { border-color: #38bdf8; box-shadow: 0 0 20px rgba(56, 189, 248, 0.2); }
 
-        .search-wrapper {
-            display: flex; background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50px; padding: 5px;
-            transition: all 0.3s ease;
+        input { flex: 1; background: transparent; border: none; color: white; padding: 15px 25px; font-size: 1.1rem; outline: none; }
+
+        #searchBtn {
+            background: #38bdf8; color: #000; border: none;
+            width: 55px; height: 55px; border-radius: 50%;
+            cursor: pointer; font-size: 1.5rem; display: grid; place-items: center;
+            transition: 0.3s;
         }
 
-        .search-wrapper:focus-within { border-color: #38bdf8; box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }
+        #searchBtn:hover { transform: scale(1.1); }
 
-        input {
-            flex: 1; background: transparent; border: none; color: white;
-            padding: 1rem 1.5rem; font-size: 1rem; outline: none; width: 100%;
+        #browser-view {
+            position: fixed; inset: 0; background: #000;
+            display: flex; flex-direction: column;
+            visibility: hidden; opacity: 0; transition: 0.4s;
         }
 
-        input::placeholder { color: #64748b; }
+        #browser-view.active { visibility: visible; opacity: 1; }
 
-        #searchButton {
-            background: linear-gradient(to right, #6366f1, #3b82f6);
-            border: none; border-radius: 50px; color: white; padding: 0 1.5rem;
-            cursor: pointer; font-size: 1.2rem; transition: transform 0.2s, box-shadow 0.2s;
-            display: flex; align-items: center; justify-content: center;
-        }
+        .nav-bar { background: #0f172a; padding: 10px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #1e293b; }
+        .nav-btn { background: rgba(255,255,255,0.05); border: none; color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
 
-        #searchButton:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
-
-        /* Browser View */
-        #iframe-container {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; opacity: 0; visibility: hidden;
-            transition: opacity 0.4s ease, visibility 0.4s; background: #000;
-        }
-
-        #iframe-container.active { opacity: 1; visibility: visible; }
-
-        .iframe-controls {
-            display: flex; background: #0f172a; padding: 10px 20px; gap: 10px;
-            border-bottom: 1px solid #1e293b; align-items: center;
-        }
-
-        .iframe-controls button {
-            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #cbd5e1; padding: 8px 15px; border-radius: 8px; cursor: pointer;
-            font-size: 1rem; display: flex; align-items: center; gap: 5px; transition: all 0.2s;
-        }
-
-        .iframe-controls button:hover { background: rgba(255, 255, 255, 0.1); color: white; }
-
-        .iframeWindow { flex: 1; border: none; width: 100%; height: 100%; background: white; }
+        iframe { flex: 1; border: none; background: white; }
     </style>
 </head>
 <body>
 
     <div id="ui-container">
         <div class="glass-panel">
-            <h1>Stellar Proxy</h1>
+            <h1>Stellar</h1>
             <p>Surf the web freely and securely.</p>
-
-            <div class="search-wrapper">
-                <input type="text" id="urlInput" placeholder="Enter URL or search..." autocomplete="off">
-                <button id="searchButton" title="Search"><i class="ph ph-arrow-right"></i></button>
+            <div class="search-bar">
+                <input type="text" id="urlInput" placeholder="Search Google or type a URL..." autocomplete="off">
+                <button id="searchBtn" onclick="launch()"><i class="ph ph-arrow-right"></i></button>
             </div>
         </div>
     </div>
 
-    <div id="iframe-container">
-        <div class="iframe-controls">
-            <button onclick="goHome()" title="Home"><i class="ph ph-house"></i> Home</button>
-            <button onclick="reloadFrame()" title="Reload"><i class="ph ph-arrows-clockwise"></i></button>
-            <button onclick="toggleFullscreen()" title="Fullscreen"><i class="ph ph-corners-out"></i></button>
+    <div id="browser-view">
+        <div class="nav-bar">
+            <button class="nav-btn" onclick="goHome()"><i class="ph ph-house"></i> Home</button>
+            <button class="nav-btn" onclick="reload()"><i class="ph ph-arrows-clockwise"></i></button>
         </div>
-        <iframe id="iframeWindow" class="iframeWindow"></iframe>
+        <iframe id="iframeWindow"></iframe>
     </div>
 
     <script>
-        const uiContainer = document.getElementById('ui-container');
-        const iframeContainer = document.getElementById('iframe-container');
-        const iframeWindow = document.getElementById('iframeWindow');
-        const urlInput = document.getElementById('urlInput');
+        const input = document.getElementById('urlInput');
+        const browser = document.getElementById('browser-view');
+        const ui = document.getElementById('ui-container');
+        const frame = document.getElementById('iframeWindow');
 
-        function performSearch() {
-            let val = urlInput.value.trim();
+        function launch() {
+            let val = input.value.trim();
             if (!val) return;
 
-            // Smart detection: Search query vs Website URL
+            // Simple Logic: If it has a dot and no spaces, it's a URL. Otherwise, it's a search.
             if (!val.includes('.') || val.includes(' ')) {
-                // It's a search term, default to Google
                 val = 'https://www.google.com/search?q=' + encodeURIComponent(val);
             } else {
-                // It's a website URL
-                if (!val.startsWith('http://') && !val.startsWith('https://')) {
-                    val = 'https://' + val;
-                }
+                if (!val.startsWith('http')) val = 'https://' + val;
             }
 
-            // Encode and load via Ultraviolet
             try {
-                iframeWindow.src = __uv$config.prefix + __uv$config.encodeUrl(val);
-                uiContainer.classList.add('hidden');
-                iframeContainer.classList.add('active');
-            } catch (err) {
-                console.error("Ultraviolet failed to encode. Is the SW registered?", err);
-                alert("Proxy failed to load. Check the console for errors.");
+                frame.src = __uv$config.prefix + __uv$config.encodeUrl(val);
+                ui.classList.add('hidden');
+                browser.classList.add('active');
+            } catch (e) {
+                alert("The proxy hasn't loaded yet. Try again in 2 seconds.");
             }
         }
 
-        // Event Listeners
-        document.getElementById('searchButton').addEventListener('click', performSearch);
-        urlInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') performSearch();
-        });
+        input.onkeydown = (e) => { if(e.key === 'Enter') launch(); };
 
-        // Iframe Controls
         function goHome() {
-            iframeWindow.src = '';
-            urlInput.value = '';
-            iframeContainer.classList.remove('active');
-            uiContainer.classList.remove('hidden');
+            frame.src = "";
+            browser.classList.remove('active');
+            ui.classList.remove('hidden');
         }
 
-        function reloadFrame() {
-            if (iframeWindow.contentWindow) iframeWindow.contentWindow.location.reload();
-        }
-
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                iframeContainer.requestFullscreen();
-            } else {
-                document.exitFullscreen();
-            }
-        }
+        function reload() { frame.contentWindow.location.reload(); }
     </script>
 </body>
 </html>
