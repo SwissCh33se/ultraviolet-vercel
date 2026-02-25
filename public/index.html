@@ -10,7 +10,210 @@
     <script src="/uv/uv.bundle.js"></script>
     <script src="/uv/uv.config.js"></script>
 
-    <link rel="stylesheet" href="style.css">
+    <script>
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker.register("/uv/sw.js", {
+                    scope: __uv$config.prefix,
+                });
+            });
+        }
+    </script>
+
+    <style>
+        /* Base Reset & Fonts */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e293b);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            height: 100vh;
+            overflow: hidden;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* UI Container (The Home Screen) */
+        #ui-container {
+            position: absolute;
+            transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
+            z-index: 10;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        #ui-container:not(.active) {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-20px);
+        }
+
+        /* Glassmorphism Panel */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 3rem 4rem;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 700px;
+        }
+
+        .glass-panel h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #a78bfa, #38bdf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-panel p {
+            color: #94a3b8;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        /* Search Wrapper & Inputs */
+        .search-wrapper {
+            display: flex;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .search-wrapper:focus-within {
+            border-color: #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+
+        .select-wrapper select {
+            background: transparent;
+            color: #e2e8f0;
+            border: none;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            outline: none;
+            cursor: pointer;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            appearance: none;
+        }
+
+        .select-wrapper select option {
+            background: #1e293b;
+            color: white;
+        }
+
+        #urlInput {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            outline: none;
+            width: 100%;
+        }
+
+        #urlInput::placeholder {
+            color: #64748b;
+        }
+
+        #searchButton {
+            background: linear-gradient(to right, #6366f1, #3b82f6);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            padding: 0 1.5rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #searchButton:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+
+        /* Iframe Container & Controls */
+        #iframe-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s;
+            background: #000;
+        }
+
+        #iframe-container.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .iframe-controls {
+            display: flex;
+            background: #0f172a;
+            padding: 10px 20px;
+            gap: 10px;
+            border-bottom: 1px solid #1e293b;
+            align-items: center;
+        }
+
+        .iframe-controls button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+
+        .iframe-controls button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .iframeWindow {
+            flex: 1;
+            border: none;
+            width: 100%;
+            height: 100%;
+            background: white; 
+        }
+    </style>
 </head>
 <body>
     <div id="ui-container" class="active">
@@ -25,7 +228,6 @@
                         <option value="https://search.brave.com/search?q=%s">Brave</option>
                         <option value="https://www.bing.com/search?q=%s">Bing (Edge)</option>
                         <option value="https://duckduckgo.com/?q=%s">DuckDuckGo</option>
-                        <option value="https://search.yahoo.com/search?p=%s">Yahoo</option>
                     </select>
                 </div>
                 <input type="text" id="urlInput" placeholder="Search the web or enter a URL..." autocomplete="off">
@@ -43,6 +245,95 @@
         <iframe id="iframeWindow" class="iframeWindow"></iframe>
     </div>
 
-    <script src="main.js"></script>
+    <script>
+        // UI Elements
+        const uiContainer = document.getElementById('ui-container');
+        const iframeContainer = document.getElementById('iframe-container');
+        const iframeWindow = document.getElementById('iframeWindow');
+        const urlInput = document.getElementById('urlInput');
+        const searchButton = document.getElementById('searchButton');
+        const engineSelect = document.getElementById('engineSelect');
+
+        // Control Bar Elements
+        const homeButton = document.getElementById('homeButton');
+        const reloadButton = document.getElementById('reloadButton');
+        const fullscreenButton = document.getElementById('fullscreenButton');
+
+        // Robust Search & URL Formatting Logic
+        function formatSearch(input, engineTemplate) {
+            try {
+                // If it's a fully formed URL, return it
+                return new URL(input).toString();
+            } catch (err) {}
+
+            try {
+                // If they typed something like "discord.com", add https:// and check if it's valid
+                const url = new URL(`https://${input}`);
+                if (url.hostname.includes(".")) {
+                    return url.toString();
+                }
+            } catch (err) {}
+
+            // If it's not a URL, inject the search term into the selected search engine
+            return engineTemplate.replace("%s", encodeURIComponent(input));
+        }
+
+        // Core execution function
+        function performSearch() {
+            const query = urlInput.value.trim();
+            if (!query) return;
+
+            try {
+                // 1. Format the URL based on input and dropdown selection
+                const finalUrl = formatSearch(query, engineSelect.value);
+
+                // 2. Encode the URL using Ultraviolet's built-in encoder
+                const encodedUrl = __uv$config.prefix + __uv$config.encodeUrl(finalUrl);
+
+                // 3. Set iframe source
+                iframeWindow.src = encodedUrl;
+
+                // 4. Swap to the browser UI
+                uiContainer.classList.remove('active');
+                iframeContainer.classList.add('active');
+            } catch (error) {
+                console.error("Search failed. Ensure uv.config.js is loaded and the Service Worker is active.", error);
+                alert("Search failed. Check console for details.");
+            }
+        }
+
+        // Event Listeners
+        searchButton.addEventListener('click', performSearch);
+
+        urlInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        // Iframe Controls
+        homeButton.addEventListener('click', () => {
+            iframeWindow.src = '';
+            urlInput.value = '';
+            iframeContainer.classList.remove('active');
+            uiContainer.classList.add('active');
+        });
+
+        reloadButton.addEventListener('click', () => {
+            if (iframeWindow.contentWindow) {
+                iframeWindow.contentWindow.location.reload();
+            }
+        });
+
+        fullscreenButton.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                iframeContainer.requestFullscreen().catch(err => {
+                    console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+    </script>
 </body>
 </html>
