@@ -1,6 +1,15 @@
 self.__uv$config = {
     prefix: '/uv/service/',
-    bare: 'https://bare.benroxy.me/', // This fast server handles the "heavy" YouTube data
+    
+    /* Wisp is the modern replacement for Bare. 
+      It handles YouTube data much better and works natively on Vercel.
+    */
+    transport: '/lib/wisp.js', 
+    wisp: 'wss://wisp.mercurywork.shop/', 
+
+    // Legacy Bare property (kept for backward compatibility, but Wisp will take over)
+    bare: 'https://bare.benroxy.me/', 
+    
     encodeUrl: Ultraviolet.codec.xor.encode,
     decodeUrl: Ultraviolet.codec.xor.decode,
     handler: '/uv/uv.handler.js',
